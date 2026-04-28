@@ -646,6 +646,76 @@ int RenderAPI_D3D12::SetBindlessTextures(int offset, unsigned numTextures, Bindl
 	return 1;
 }
 
+int RenderAPI_D3D12::SetBindlessBuffers(int offset, unsigned numBuffers, BindlessBuffer* buffers
+) {
+	if (!isInitialized) {
+		UnityLog::LogError("Plugin is not initialized, try restart Unity Editor\n");
+		return 0;
+	}
+
+	if (myD3D12->hookedDescriptorHeaps.empty()) {
+		UnityLog::LogError("SetBindlessBuffers is called, but no srvHeap is set.\n");
+		return 0;
+	}
+
+	// TODO: Optimize;
+	// TODO: Check for changes
+	const auto& heaps = this->hookedDescriptorHeaps;
+	for (auto heap : heaps) {
+		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle(heap->GetCPUDescriptorHandleForHeapStart());
+		cpuHandle.Offset(this->srvIncrement * this->srvBaseOffset);
+		cpuHandle.Offset(this->srvIncrement * offset);
+
+		for (unsigned i = 0; i < numBuffers; i++) {
+			auto b = buffers[i];
+
+/* TODO: vixyz
+			if (b.type == BindlessTextureType::None) {
+				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				srvDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+				srvDesc.Texture2D.MostDetailedMip = 0;
+				srvDesc.Texture2D.MipLevels = 1;
+				srvDesc.Texture2D.PlaneSlice = 0;
+				srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+
+				// Empty resource
+				device->CreateShaderResourceView(nullptr, &srvDesc, cpuHandle);
+				goto next;
+			}
+
+			if (b.type == BindlessTextureType::Resource) {
+				auto texResource = (ID3D12Resource*)b.handle;
+				auto desc = texResource->GetDesc();
+
+				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				srvDesc.Format = b.forceFormat != 0 ? (DXGI_FORMAT)b.forceFormat : typeless_fmt_to_typed(desc.Format);
+				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+				srvDesc.Texture2D.MostDetailedMip = b.minMip;
+				srvDesc.Texture2D.MipLevels = b.maxMip == 255u ? desc.MipLevels : (b.maxMip - b.minMip);
+				srvDesc.Texture2D.PlaneSlice = 0;
+				srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+
+				device->CreateShaderResourceView(texResource, &srvDesc, cpuHandle);
+				goto next;
+			}
+
+			if (b.type == BindlessTextureType::SRV) {
+				UnityLog::LogWarning("Raw SRVs are not supported on D3D12\n");
+				goto next;
+			}
+*/
+
+		next:
+			cpuHandle.Offset(this->srvIncrement);
+		}
+	}
+
+	return 1;
+}
+
 extern "C" static void STDMETHODCALLTYPE Hooked_SetDescriptorHeaps(ID3D12GraphicsCommandList10* This,
 	_In_  UINT NumDescriptorHeaps,
 	_In_reads_(NumDescriptorHeaps)  ID3D12DescriptorHeap* const* ppDescriptorHeaps) {

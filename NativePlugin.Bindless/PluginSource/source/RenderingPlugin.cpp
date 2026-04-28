@@ -143,3 +143,20 @@ extern "C" UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API MeetemBindless_SetBind
 
 	return s_CurrentAPI->SetBindlessTextures(offset,(unsigned)numTextures, textures);
 }
+
+unsigned long numBufferUpdates = 0;
+extern "C" UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API MeetemBindless_SetBindlessBuffers(int offset, int numBuffers, BindlessBuffer * buffers)
+{
+	if (s_CurrentAPI == nullptr || buffers == nullptr || numBuffers <= 0)
+		return 0;
+
+#ifdef BINDLESS_TRUETRACE_DEMO
+	if (numBufferUpdates % 4 == 0) {
+		PrintDemoMessage();
+	}
+
+	numBufferUpdates++;
+#endif
+
+	return s_CurrentAPI->SetBindlessBuffers(offset,(unsigned)numBuffers, buffers);
+}

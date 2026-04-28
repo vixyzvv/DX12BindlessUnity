@@ -35,6 +35,9 @@ struct BindlessTexture {
 	unsigned unused;
 };
 
+struct BindlessBuffer {
+};
+
 class RenderAPI
 {
 public:
@@ -43,6 +46,7 @@ public:
 	virtual void ProcessDeviceEvent(UnityGfxDeviceEventType type, IUnityInterfaces* interfaces) = 0;
 	virtual bool GetUsesReverseZ() = 0;
 	virtual int SetBindlessTextures(int offset, unsigned numTextures, BindlessTexture* textures) = 0;
+	virtual int SetBindlessBuffers(int offset, unsigned numBuffers, BindlessBuffer* buffers) = 0;
 	virtual void SetCurrentBindlessOffset(void* eventData) = 0;
 
 	virtual void HookSetFunctions() {

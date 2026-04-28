@@ -25,6 +25,8 @@ public:
 
     virtual int SetBindlessTextures(int offset, unsigned numTextures, BindlessTexture* textures
     );
+    virtual int SetBindlessBuffers(int offset, unsigned numBuffers, BindlessBuffer* buffers
+    );
 
     virtual void SetCurrentBindlessOffset(void* eventData) override;
     static DXGI_FORMAT typeless_fmt_to_typed(DXGI_FORMAT format);
